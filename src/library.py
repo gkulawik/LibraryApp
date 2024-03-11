@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 """
@@ -53,21 +53,55 @@ Requirements:
 class LibraryResource:
     title: str
     genre: str
-    availability_status: bool
+    availability_status: bool = field(default=False)
     # Consider adding a unique ID for each library resource, assigned while adding resources to the Library
     # id: bool = 0
 
 
 @dataclass
 class Book(LibraryResource):
-    author: str
-    isbn: str
+    # Define fields with default values or leave them to be set in __post_init__
+    # This is a workaround as all fields in a dataclass that have a default value must come after those without
+    author: str = field(default=None)  # Temporarily set a default, will be replaced
+    isbn: str = field(default=None)    # Temporarily set a default, will be replaced
+
+    def __post_init__(self):
+        # Assert to ensure no default values are used accidentally
+        assert self.author is not None, "Author is required"
+        assert self.isbn is not None, "ISBN is required"
 
 
 @dataclass
 class Dvd(LibraryResource):
-    director: str
-    duration: str
+    director: str = field(default=None)  # Temporarily set a default, will be replaced
+    duration: str = field(default=None)  # Temporarily set a default, will be replaced
+
+    def __post_init__(self):
+        # Assert to ensure no default values are used accidentally
+        assert self.director is not None, "Director is required"
+        assert self.duration is not None, "Duration is required"
+
+
+@dataclass
+class Cd(LibraryResource):
+    artist: str = field(default=None)  # Temporarily set a default, will be replaced
+    duration: str = field(default=None)  # Temporarily set a default, will be replaced
+
+    def __post_init__(self):
+        # Assert to ensure no default values are used accidentally
+        assert self.artist is not None, "Artist is required"
+        assert self.duration is not None, "Duration is required"
+
+
+@dataclass
+class Magazine(LibraryResource):
+    publisher: str = field(default=None)  # Temporarily set a default, will be replaced
+    publication_date: str = field(default=None)  # Temporarily set a default, will be replaced
+
+    def __post_init__(self):
+        # Assert to ensure no default values are used accidentally
+        assert self.publisher is not None, "Publisher is required"
+        assert self.publication_date is not None, "Publication date is required"
 
 
 class Library:
@@ -75,6 +109,8 @@ class Library:
         self._resources = []
 
     def add_resource(self, new_resource: LibraryResource):
+        if not isinstance(new_resource, LibraryResource):
+            raise TypeError("The resource must be of type derived from type LibraryResource, e.g., Book!")
         self._resources.append(new_resource)
 
     @property
@@ -83,5 +119,9 @@ class Library:
 
     @property
     def books(self):
+        """
+        Filter the list of all resources looking for Book objects.
+        :return: A list of all Book objects
+        """
         book_resources = filter(lambda x: isinstance(x, Book), self._resources)
         return list(book_resources)
