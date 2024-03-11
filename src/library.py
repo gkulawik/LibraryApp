@@ -54,6 +54,8 @@ class LibraryResource:
     title: str
     genre: str
     availability_status: bool
+    # Consider adding a unique ID for each library resource, assigned while adding resources to the Library
+    # id: bool = 0
 
 
 @dataclass
@@ -68,21 +70,18 @@ class Dvd(LibraryResource):
     duration: str
 
 
-class LibraryCollection:
+class Library:
     def __init__(self):
-        self._books: List[Book] = []
-        self._dvds: List[Dvd] = []
+        self._resources = []
 
     def add_resource(self, new_resource: LibraryResource):
-        if isinstance(new_resource, Book):
-            self._books.append(new_resource)
-        elif isinstance(new_resource, Dvd):
-            self._dvds.append(new_resource)
+        self._resources.append(new_resource)
+
+    @property
+    def resources(self):
+        return self._resources
 
     @property
     def books(self):
-        return self._books
-
-    @property
-    def dvds(self):
-        return self._dvds
+        book_resources = filter(lambda x: isinstance(x, Book), self._resources)
+        return list(book_resources)
