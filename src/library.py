@@ -54,6 +54,7 @@ class LibraryResource:
     title: str
     genre: str
     availability_status: bool = field(default=False)
+    quantity: int = field(default=0)
     # Consider adding a unique ID for each library resource, assigned while adding resources to the Library
     # id: bool = 0
 
@@ -63,7 +64,7 @@ class Book(LibraryResource):
     # Define fields with default values or leave them to be set in __post_init__
     # This is a workaround as all fields in a dataclass that have a default value must come after those without
     author: str = field(default=None)  # Temporarily set a default, will be replaced
-    isbn: str = field(default=None)    # Temporarily set a default, will be replaced
+    isbn: str = field(default=None)  # Temporarily set a default, will be replaced
 
     def __post_init__(self):
         # Assert to ensure no default values are used accidentally
@@ -108,9 +109,14 @@ class Library:
     def __init__(self):
         self._resources = []
 
-    def add_resource(self, new_resource: LibraryResource):
+    def add_resource(self, new_resource: LibraryResource, quantity: int):
         if not isinstance(new_resource, LibraryResource):
             raise TypeError("The resource must be of type derived from type LibraryResource, e.g., Book!")
+        if not quantity > 0:
+            raise ValueError("If you're adding a resource, you must add at least 1 item!")
+        # While adding a new resource, it becomes available for people to borrow
+        new_resource.quantity = quantity
+        new_resource.availability_status = True
         self._resources.append(new_resource)
 
     @property
