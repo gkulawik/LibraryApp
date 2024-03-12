@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
+from enum import Enum, auto
 
 """
 To modify the library exercise to allow borrowing more than just books, we can extend the concept of the
@@ -105,6 +106,11 @@ class Magazine(LibraryResource):
         assert self.publication_date is not None, "Publication date is required"
 
 
+# class Memberships(Enum):
+#     REGULAR = auto()
+#     PREMIUM = auto()
+
+
 class Library:
     def __init__(self):
         self._resources = []
@@ -131,3 +137,30 @@ class Library:
         """
         book_resources = filter(lambda x: isinstance(x, Book), self._resources)
         return list(book_resources)
+
+    @property
+    def dvds(self):
+        """
+        Filter the list of all resources looking for DVD objects.
+        :return: A list of all DVD objects
+        """
+        dvd_resources = filter(lambda x: isinstance(x, Dvd), self._resources)
+        return list(dvd_resources)
+
+    @property
+    def cds(self):
+        """
+        Filter the list of all resources looking for CD objects.
+        :return: A list of all CD objects
+        """
+        cd_resources = filter(lambda x: isinstance(x, Cd), self._resources)
+        return list(cd_resources)
+
+    @property
+    def magazines(self):
+        """
+        Filter the list of all resources looking for Magazine objects.
+        :return: A list of all Magazine objects
+        """
+        magazine_resources = filter(lambda x: isinstance(x, Magazine), self._resources)
+        return list(magazine_resources)
