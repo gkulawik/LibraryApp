@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
-from enum import Enum, auto
+from typing import List, Any
+from enum import Enum
+from operator import attrgetter
 
 """
 To modify the library exercise to allow borrowing more than just books, we can extend the concept of the
@@ -56,8 +57,7 @@ class LibraryResource:
     genre: str
     availability_status: bool = field(default=False)
     quantity: int = field(default=0)
-    # Consider adding a unique ID for each library resource, assigned while adding resources to the Library
-    # id: bool = 0
+    id: int = field(default=0)
 
 
 @dataclass
@@ -107,8 +107,8 @@ class Magazine(LibraryResource):
 
 
 # class Memberships(Enum):
-#     REGULAR = auto()
-#     PREMIUM = auto()
+#     REGULAR = 1
+#     PREMIUM = 2
 
 
 class Library:
@@ -123,7 +123,31 @@ class Library:
         # While adding a new resource, it becomes available for people to borrow
         new_resource.quantity = quantity
         new_resource.availability_status = True
+        # The new resource also gets its unique ID number
+        if len(self._resources) > 0:
+            latest_assigned_id = (max(resource.id for resource in self._resources)) + 1
+            new_resource.id = latest_assigned_id
+        else:
+            new_resource.id = 1
         self._resources.append(new_resource)
+
+    def find_resources(self, **keywords) -> List[Any]:
+        """
+        Return a list of resources that match the criteria entered by user, e.g., title = "Harry Potter".
+        """
+        results = []
+        for resource in self._resources:
+            # The default value None prevents AttributeError from being raised if one of the objects in the list
+            # doesn't have an attribute specified in kwargs.
+            match = any(getattr(resource, key, None) == value for key, value in keywords.items())
+            if match:
+                results.append(resource)
+        return results
+
+    # def remove_resource(self, resource_to_remove: LibraryResource, quantity: int):
+    #     if not isinstance(resource_to_remove, LibraryResource):
+    #         raise TypeError("The resource must be of type derived from type LibraryResource, e.g., Book!")
+    #     # If you remove all quantity, remove the resource completely
 
     @property
     def resources(self):
