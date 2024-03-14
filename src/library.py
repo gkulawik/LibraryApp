@@ -106,9 +106,9 @@ class Magazine(LibraryResource):
         assert self.publication_date is not None, "Publication date is required"
 
 
-# class Memberships(Enum):
-#     REGULAR = 1
-#     PREMIUM = 2
+class Memberships(Enum):
+    REGULAR = 1
+    PREMIUM = 2
 
 
 class Library:
@@ -221,3 +221,12 @@ class Library:
         """
         magazine_resources = filter(lambda x: isinstance(x, Magazine), self._resources)
         return list(magazine_resources)
+
+
+class Member:
+    def __init__(self, membership_status: Memberships, name: str):
+        self._membership_status = membership_status
+        self._name = name
+
+    def __str__(self):
+        return f"{self._name}, {self._membership_status.name} member"
