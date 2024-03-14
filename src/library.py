@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import List, Any
 from enum import Enum
 from operator import attrgetter
@@ -115,21 +115,32 @@ class Library:
     def __init__(self):
         self._resources = []
 
-    def add_resource(self, new_resource: LibraryResource, quantity: int):
+    def add_resource(self, new_resource: LibraryResource, quantity_to_add: int):
         if not isinstance(new_resource, LibraryResource):
             raise TypeError("The resource must be of type derived from type LibraryResource, e.g., Book!")
-        if not quantity > 0:
+        if not quantity_to_add > 0:
             raise ValueError("If you're adding a resource, you must add at least 1 item!")
-        # While adding a new resource, it becomes available for people to borrow
-        new_resource.quantity = quantity
-        new_resource.availability_status = True
-        # The new resource also gets its unique ID number
         if len(self._resources) > 0:
-            latest_assigned_id = (max(resource.id for resource in self._resources)) + 1
-            new_resource.id = latest_assigned_id
+            # If the resource already exists in the library, simply add more copies of it
+            resource_already_exists = False
+            resource_attributes = asdict(new_resource)
+            for resource in self._resources:
+                match = all(getattr(resource, key, None) == value for key, value in resource_attributes.items())
+                if match:
+                    resource.quantity += quantity_to_add
+                    resource_already_exists = True
+                    break
+            if not resource_already_exists:
+                new_resource.quantity = quantity_to_add
+                new_resource.availability_status = True
+                latest_assigned_id = (max(resource.id for resource in self._resources)) + 1
+                new_resource.id = latest_assigned_id
+                self._resources.append(new_resource)
         else:
+            new_resource.quantity = quantity_to_add
+            new_resource.availability_status = True
             new_resource.id = 1
-        self._resources.append(new_resource)
+            self._resources.append(new_resource)
 
     def find_resources(self, **keywords) -> List[Any]:
         """
@@ -144,10 +155,32 @@ class Library:
                 results.append(resource)
         return results
 
-    # def remove_resource(self, resource_to_remove: LibraryResource, quantity: int):
-    #     if not isinstance(resource_to_remove, LibraryResource):
-    #         raise TypeError("The resource must be of type derived from type LibraryResource, e.g., Book!")
-    #     # If you remove all quantity, remove the resource completely
+    def remove_resources(self, quantity_to_remove: int, **criteria):
+        """
+        Remove the resource from the library. You must specify the number of copies of the item you want to remove
+        and provide criteria to identify the resource you want to remove, e.g., its title or ID.
+        If you remove all existing copies, the resource becomes unavailable.
+        :param quantity_to_remove: Number of copies to be removed.
+        :param criteria: Information to identify the resource you want to remove, e.g., its title or ID.
+        :return:
+        """
+        removed_any_items = False
+        for resource in self._resources:
+            match = any(getattr(resource, key, None) == value for key, value in criteria.items())
+            if match:
+                if quantity_to_remove < resource.quantity:
+                    resource.quantity = resource.quantity - quantity_to_remove
+                    print(f"Removed {quantity_to_remove} items")
+                    removed_any_items = True
+                elif quantity_to_remove > resource.quantity:
+                    raise ValueError("Can't remove more items than there are in the library!")
+                else:
+                    # If you remove all copies, the resource becomes unavailable
+                    resource.quantity = 0
+                    resource.availability_status = False
+                    removed_any_items = True
+        if not removed_any_items:
+            raise KeyError("Didn't find any resources matching your criteria!")
 
     @property
     def resources(self):
