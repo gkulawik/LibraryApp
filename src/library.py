@@ -196,6 +196,36 @@ class Library:
         self._members.append(new_member)
         return new_member
 
+    def check_out_resources(self, member, requested_resources_ids: list[int]) -> list[int]:
+        current_borrowing_limit = member.borrowing_limit
+        # Initial checks before searching the library.
+        # Can this member borrow any resources at all?
+        if current_borrowing_limit < 1:
+            raise Exception("You can't borrow any more resources. Return something first!")
+        # Are they trying to borrow more resources than their current borrowing limit?
+        if current_borrowing_limit < len(requested_resources_ids):
+            raise Exception(f"You can't borrow more resources than your current borrowing "
+                            f"limit= {current_borrowing_limit}. \n"
+                            "Try borrowing less items or return something first!")
+        borrowed_resources = []
+        found_any_resources = False
+        # Search the library resources looking for the resources the member is trying to borrow
+        for requested_resource_id in requested_resources_ids:
+            found_requested_resource = False
+            for resource in self._resources:
+                if getattr(resource, "id") == requested_resource_id:
+                    found_any_resources = True
+                    found_requested_resource = True
+                    print(f"Found the resource you wanted to borrow: ID= {requested_resource_id}")
+                    # Check if the found resource is available
+            if not found_requested_resource:
+                print(f"Didn't find the resource you wanted to borrow: ID= {requested_resource_id}")
+        if not found_any_resources:
+            raise KeyError("Didn't find any of the resources you wanted to borrow!")
+
+        # If the resource exists, check its availability
+        # If available - add it to the list of borrowed IDs and reduce the current_borrowing_limit
+
     @property
     def resources(self):
         return self._resources
@@ -244,7 +274,21 @@ class Member:
         self._membership_status = membership_status
         self._user_id = user_id
         self._borrowing_limit = borrowing_limit
-        self._borrowed_resources = []   # List of borrowed resources' IDs from the library
+        self._borrowed_resources = []  # List of borrowed resources' IDs from the library
+
+    def borrow_resources(self, resources_ids: list[int]):
+        """
+        Borrow resources by identifying resources to borrow by their unique IDs.
+        It's possible to borrow multiple resources at once.
+        Member can borrow only 1 copy of each resource.
+        :param resources_ids: List of resources' IDs
+        :return:
+        """
+        # todo: Check if the list isn't empty.
+        # todo: Check if the list doesn't contain duplicate IDs as it's possible to borrow only 1 copy of each resource
+        # Access a method from the library and pass the member instance as the first argument
+        # so the library can access this member's attributes
+        self.library.check_out_resources(self, resources_ids)
 
     @property
     def user_id(self):
@@ -254,15 +298,9 @@ class Member:
     def borrowing_limit(self):
         return self._borrowing_limit
 
-    # def borrow_resources(self):
-    #     """
-    #     1) It is possible to borrow multiple (different) resources at once.
-    #     2) Can borrow only 1 copy of a given resource
-    #     3) Use borrowing_limit
-    #     Member --> Library: info to identify the resources he wants to borrow, then
-    #     Library: handle exceptions, assign borrowed resources to user ID.
-    #     :return:
-    #     """
+    @property
+    def library(self):
+        return self._library
 
     def __str__(self):
         return f"{self._name}, {self._membership_status.name} member"
