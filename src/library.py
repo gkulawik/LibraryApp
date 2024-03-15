@@ -114,6 +114,7 @@ class Memberships(Enum):
 class Library:
     def __init__(self):
         self._resources = []
+        self._members = []
 
     def add_resource(self, new_resource: LibraryResource, quantity_to_add: int):
         if not isinstance(new_resource, LibraryResource):
@@ -182,6 +183,19 @@ class Library:
         if not removed_any_items:
             raise KeyError("Didn't find any resources matching your criteria!")
 
+    def create_member(self, name, membership_status):
+        if len(self._members) > 0:
+            user_id = (max(member.id for member in self._members)) + 1
+        else:
+            user_id = 1
+        if membership_status is Memberships.PREMIUM:
+            borrowing_limit = 4
+        else:
+            borrowing_limit = 2
+        new_member = Member(name, self, membership_status, user_id, borrowing_limit)
+        self._members.append(new_member)
+        return new_member
+
     @property
     def resources(self):
         return self._resources
@@ -224,9 +238,31 @@ class Library:
 
 
 class Member:
-    def __init__(self, membership_status: Memberships, name: str):
-        self._membership_status = membership_status
+    def __init__(self, name: str, library: Library, membership_status: Memberships, user_id: int, borrowing_limit: int):
         self._name = name
+        self._library = library
+        self._membership_status = membership_status
+        self._user_id = user_id
+        self._borrowing_limit = borrowing_limit
+        self._borrowed_resources = []   # List of borrowed resources' IDs from the library
+
+    @property
+    def user_id(self):
+        return self._user_id
+
+    @property
+    def borrowing_limit(self):
+        return self._borrowing_limit
+
+    # def borrow_resources(self):
+    #     """
+    #     1) It is possible to borrow multiple (different) resources at once.
+    #     2) Can borrow only 1 copy of a given resource
+    #     3) Use borrowing_limit
+    #     Member --> Library: info to identify the resources he wants to borrow, then
+    #     Library: handle exceptions, assign borrowed resources to user ID.
+    #     :return:
+    #     """
 
     def __str__(self):
         return f"{self._name}, {self._membership_status.name} member"
