@@ -273,6 +273,38 @@ class Library:
         magazine_resources = filter(lambda x: isinstance(x, Magazine), self._resources)
         return list(magazine_resources)
 
+    @property
+    def available_books(self):
+        available_books = []
+        for book in self.books:
+            if getattr(book, "availability_status"):
+                available_books.append(book)
+        return available_books
+
+    @property
+    def available_dvds(self):
+        available_dvds = []
+        for dvd in self.dvds:
+            if getattr(dvd, "availability_status"):
+                available_dvds.append(dvd)
+        return available_dvds
+
+    @property
+    def available_cds(self):
+        available_cds = []
+        for cd in self.cds:
+            if getattr(cd, "availability_status"):
+                available_cds.append(cd)
+        return available_cds
+
+    @property
+    def available_magazines(self):
+        available_magazines = []
+        for magazine in self.magazines:
+            if getattr(magazine, "availability_status"):
+                available_magazines.append(magazine)
+        return available_magazines
+
 
 class Member:
     def __init__(self, name: str, library: Library, membership_status: Memberships, user_id: int, borrowing_limit: int):
