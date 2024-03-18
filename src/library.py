@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field, asdict
 from typing import List, Any
 from enum import Enum
-from operator import attrgetter
 
 """
 To modify the library exercise to allow borrowing more than just books, we can extend the concept of the
@@ -197,6 +196,15 @@ class Library:
         return new_member
 
     def check_out_resources(self, member, requested_resources_ids: list[int]) -> list[int]:
+        """
+        Method to allow members to borrow resources at the library.
+        Member passes a list of resources' IDs they want to borrow and the library handles the rest.
+        If the conditions to borrow any of the requested resources are met, library passes back to the member
+        a list of IDs of the resources they borrowed.
+        :param member: Member object.
+        :param requested_resources_ids: List of ID's of the library resources to borrow.
+        :return: List of resources' IDs that were borrowed.
+        """
         # Initial checks before searching the library.
         # Can this member borrow any resources at all?
         if member.borrowing_limit < 1:
@@ -225,13 +233,39 @@ class Library:
                             resource.availability_status = False
                     else:
                         print("But this resource is currently unavailable")
-                    # Stop searching the resources as soon as the requested resource is found in the library
+                    # Stop searching the library resources as soon as the requested resource is found in the library
                     break
             if not found_requested_resource:
                 print(f"Didn't find the resource you wanted to borrow: ID= {requested_resource_id}")
         if not found_any_resources:
             raise KeyError("Didn't find any of the resources you wanted to borrow!")
         return borrowed_resources_ids
+
+    def check_in_resources(self, resources_to_return_ids: list[int]) -> list[int]:
+        """
+        Method to allow members to return resources to the library.
+        Member passes a list of resources' IDs they want to return and the library handles the rest.
+        If the conditions to return any of the specified resources are met, library passes back to the member
+        a list of IDs of the resources they returned.
+        :param member: Member object.
+        :param resources_to_return_ids: List of ID's of the library resources to return.
+        :return: List of resources' IDs that were returned.
+        """
+        returned_resources_ids = []
+        found_any_resources = False
+        for resource_to_return_id in resources_to_return_ids:
+            for resource in self._resources:
+                if getattr(resource, "id") == resource_to_return_id:
+                    found_any_resources = True
+                    resource.quantity += 1
+                    resource.availability_status = True
+                    returned_resources_ids.append(resource.id)
+                    print(f"You've returned the resource: ID= {resource_to_return_id}")
+                    # Stop searching the library resources as soon as the resource to return is found in the library
+                    break
+        if not found_any_resources:
+            raise KeyError("Didn't find any of the resources you wanted to return!")
+        return returned_resources_ids
 
     @property
     def resources(self):
@@ -315,35 +349,62 @@ class Member:
         self._borrowing_limit = borrowing_limit
         self._borrowed_resources_ids = []  # List of borrowed resources' IDs from the library
 
-    def borrow_resources(self, resources_ids: list[int]):
+    def borrow_resources(self, resources_to_borrow_ids: list[int]):
         """
         Borrow resources by identifying resources to borrow by their unique IDs.
         It's possible to borrow multiple resources at once.
         Member can borrow only 1 copy of each resource.
-        :param resources_ids: List of resources' IDs
+        :param resources_to_borrow_ids: List of resources' IDs
         :return:
         """
         # Check if the list isn't empty.
-        if len(resources_ids) < 1:
+        if len(resources_to_borrow_ids) < 1:
             raise KeyError("You must specify at least 1 resource ID you want to borrow.")
         # Check if the list doesn't contain duplicate IDs as it's possible to borrow only 1 copy of each resource.
         # A set in Python automatically removes any duplicate values:
-        if not len(resources_ids) == len(set(resources_ids)):
+        if not len(resources_to_borrow_ids) == len(set(resources_to_borrow_ids)):
             raise KeyError("You can borrow only 1 copy of each resource. Please enter unique resource IDs.")
         # Check if the member isn't trying to borrow a copy of a resource they've already borrowed
         for already_borrowed_resource_id in self._borrowed_resources_ids:
-            for resource_to_borrow_id in resources_ids:
+            for resource_to_borrow_id in resources_to_borrow_ids:
                 if already_borrowed_resource_id == resource_to_borrow_id:
                     raise KeyError("You can only borrow 1 copy of each library resource. "
                                    f"You've already borrowed this item: ID= {already_borrowed_resource_id}")
 
         # Access a method from the library and pass the member instance as the first argument
         # so the library can access this member's attributes
-        new_borrowed_resources_ids = self.library.check_out_resources(self, resources_ids)
+        new_borrowed_resources_ids = self.library.check_out_resources(self, resources_to_borrow_ids)
         if len(new_borrowed_resources_ids) > 0:
             self._borrowing_limit -= len(new_borrowed_resources_ids)
             for new_resource_id in new_borrowed_resources_ids:
                 self._borrowed_resources_ids.append(new_resource_id)
+
+    def return_resources(self, resources_to_return_ids: list[int]):
+        """
+        Return resources by identifying resources to return by their unique IDs.
+        It's possible to return multiple resources at once.
+        :param resources_to_return_ids: List of resources' IDs
+        :return:
+        """
+        # Check if the list isn't empty.
+        if len(resources_to_return_ids) < 1:
+            raise KeyError("You must specify at least 1 resource ID you want to return.")
+        # Check if the member isn't trying to return more items than they've borrowed
+        if len(resources_to_return_ids) > len(self._borrowed_resources_ids):
+            raise KeyError(f"You're trying to return more items than you've borrowed. "
+                           f"You currently have {len(self._borrowed_resources_ids)} borrowed items")
+        # Check if the member isn't trying to return items that they haven't borrowed
+        is_returning_valid_ids = all(item in self._borrowed_resources_ids for item in resources_to_return_ids)
+        if not is_returning_valid_ids:
+            raise KeyError(f"You're trying to return items that you haven't borrowed. "
+                           f"You currently have these items borrowed: IDs= {self._borrowed_resources_ids}")
+        # After getting from the library a list of returned items, remove them from member's borrowed_list;
+        # update borrowing_limit
+        returned_resources_ids = self.library.check_in_resources(resources_to_return_ids)
+        if len(returned_resources_ids) > 0:
+            for returned_resource_id in returned_resources_ids:
+                self._borrowed_resources_ids.remove(returned_resource_id)
+            self._borrowing_limit += len(returned_resources_ids)
 
     @property
     def user_id(self):
