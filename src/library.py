@@ -323,9 +323,20 @@ class Member:
         :param resources_ids: List of resources' IDs
         :return:
         """
-        # todo: Check if the list isn't empty.
-        # todo: Check if the list doesn't contain duplicate IDs as it's possible to borrow only 1 copy of each resource
-        # todo: Check if the member isn't trying to borrow a copy of resources they already borrowed
+        # Check if the list isn't empty.
+        if len(resources_ids) < 1:
+            raise KeyError("You must specify at least 1 resource ID you want to borrow.")
+        # Check if the list doesn't contain duplicate IDs as it's possible to borrow only 1 copy of each resource.
+        # A set in Python automatically removes any duplicate values:
+        if not len(resources_ids) == len(set(resources_ids)):
+            raise KeyError("You can borrow only 1 copy of each resource. Please enter unique resource IDs.")
+        # Check if the member isn't trying to borrow a copy of a resource they've already borrowed
+        for already_borrowed_resource_id in self._borrowed_resources_ids:
+            for resource_to_borrow_id in resources_ids:
+                if already_borrowed_resource_id == resource_to_borrow_id:
+                    raise KeyError("You can only borrow 1 copy of each library resource. "
+                                   f"You've already borrowed this item: ID= {already_borrowed_resource_id}")
+
         # Access a method from the library and pass the member instance as the first argument
         # so the library can access this member's attributes
         new_borrowed_resources_ids = self.library.check_out_resources(self, resources_ids)
