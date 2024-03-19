@@ -422,5 +422,13 @@ class Member:
     def borrowed_resources_ids(self):
         return self._borrowed_resources_ids
 
+    @property
+    def borrowed_resources_details(self):
+        borrowed_resources_details = []
+        for item_id in self.borrowed_resources_ids:
+            resource_details = self.library.find_resources(id=item_id)
+            borrowed_resources_details.append(resource_details)
+        return borrowed_resources_details
+
     def __str__(self):
         return f"{self._name}, {self._membership_status.name} member"
