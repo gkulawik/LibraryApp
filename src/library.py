@@ -339,6 +339,23 @@ class Library:
                 available_magazines.append(magazine)
         return available_magazines
 
+    @property
+    def statistics(self):
+        total_number_of_library_resources = len(self._resources)
+        number_of_available_library_resources = 0
+        for resource in self._resources:
+            if getattr(resource, "availability_status") is True:
+                number_of_available_library_resources += 1
+        number_of_borrowed_resources = 0
+        for member in self._members:
+            number_of_borrowed_resources += len(member.borrowed_resources_ids)
+
+        return (f"""
+        Total number of library resources: {total_number_of_library_resources}
+        Number of available resources: {number_of_available_library_resources}
+        Number of borrowed resources: {number_of_borrowed_resources}
+        """)
+
 
 class Member:
     def __init__(self, name: str, library: Library, membership_status: Memberships, user_id: int, borrowing_limit: int):
