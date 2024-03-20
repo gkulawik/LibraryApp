@@ -308,6 +308,10 @@ class Library:
         return list(magazine_resources)
 
     @property
+    def members(self):
+        return self._members
+
+    @property
     def available_books(self):
         available_books = []
         for book in self.books:
