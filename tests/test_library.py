@@ -18,30 +18,10 @@ class TestLibrary:
                           author="J.R.R. Tolkien",
                           isbn="978-0007458424")
 
-        # self.book3 = Book(title="Harry Potter Box Set: The Complete Collection",
-        #                   genre="fantasy fiction",
-        #                   author="J.K. Rowling",
-        #                   isbn="978-1408856772")
-        #
-        # self.book4 = Book(title="Deep Work: Rules for Focused Success in a Distracted World",
-        #                   genre="self-help",
-        #                   author="Cal Newport",
-        #                   isbn="978-0349411903")
-
         self.dvd1 = Dvd(title="Gladiator",
                         genre="historical fiction",
                         director="Ridley Scott",
                         duration="2h 18min")
-
-        # self.cd1 = Cd(title="Highway To Hell",
-        #               genre="rock",
-        #               artist="AC/DC",
-        #               duration="1h 8min")
-        #
-        # self.magazine1 = Magazine(title="Time",
-        #                           genre="news magazine",
-        #                           publisher="Time Inc.",
-        #                           publication_date="19.03.2024")
 
         return self.library1, self.book1, self.book2, self.dvd1,
 
@@ -96,13 +76,13 @@ class TestLibrary:
         self.library1.add_resource(self.dvd1, 2)
         self.library1.add_resource(self.book2, 3)
         assert self.library1.find_resources(title="The hobbit, or There and back again") == [Book \
-                                                                                                 (title="The hobbit, or There and back again",
-                                                                                                  genre="fantasy fiction",
-                                                                                                  availability_status=True,
-                                                                                                  quantity=3,
-                                                                                                  id=3,
-                                                                                                  author="J.R.R. Tolkien",
-                                                                                                  isbn="978-0007458424")]
+                                                                         (title="The hobbit, or There and back again",
+                                                                          genre="fantasy fiction",
+                                                                          availability_status=True,
+                                                                          quantity=3,
+                                                                          id=3,
+                                                                          author="J.R.R. Tolkien",
+                                                                          isbn="978-0007458424")]
 
     def test_find_resources_by_author(self, setup_data):
         """
@@ -113,21 +93,21 @@ class TestLibrary:
         self.library1.add_resource(self.book2, 3)
         print(self.library1.resources)
         assert self.library1.find_resources(author="J.R.R. Tolkien") == [Book \
-                                                                             (title='The Lord of the Rings - Trilogy',
-                                                                              genre='fantasy fiction',
-                                                                              availability_status=True,
-                                                                              quantity=2,
-                                                                              id=1,
-                                                                              author='J.R.R. Tolkien',
-                                                                              isbn='978-0261103252'),
-                                                                         Book \
-                                                                             (title="The hobbit, or There and back again",
-                                                                              genre="fantasy fiction",
-                                                                              availability_status=True,
-                                                                              quantity=3,
-                                                                              id=3,
-                                                                              author="J.R.R. Tolkien",
-                                                                              isbn="978-0007458424")]
+                                                                         (title='The Lord of the Rings - Trilogy',
+                                                                          genre='fantasy fiction',
+                                                                          availability_status=True,
+                                                                          quantity=2,
+                                                                          id=1,
+                                                                          author='J.R.R. Tolkien',
+                                                                          isbn='978-0261103252'),
+                                                                     Book \
+                                                                         (title="The hobbit, or There and back again",
+                                                                          genre="fantasy fiction",
+                                                                          availability_status=True,
+                                                                          quantity=3,
+                                                                          id=3,
+                                                                          author="J.R.R. Tolkien",
+                                                                          isbn="978-0007458424")]
 
     def test_remove_single_copy_of_a_resource(self, setup_data):
         """
