@@ -25,25 +25,3 @@ dvd1 = Dvd(title="Gladiator",
            director="Ridley Scott",
            duration="2h 18min")
 
-library = Library()
-library.add_resource(book1, 2)
-library.add_resource(book2, 2)
-library.add_resource(book3, 2)
-member1 = library.create_member(name="John Doe", membership_status=Memberships.PREMIUM)
-print(member1.borrowed_resources_ids)
-member1.borrow_resources([1, 3])
-print(member1.borrowed_resources_ids)
-member1.borrow_resources([1, 3])
-print(member1.borrowed_resources_ids)
-
-# todo:  Display available resources of each type (books, DVDs, CDs, magazines).
-
-# todo:   Allow a member to return a resource.
-
-# todo: Display borrowed resources for a member. Pass borrowed IDs to the library
-#  and get back a list of borrowed resources with all details
-
-# todo: Display library statistics (total number of resources, number of available resources,
-#  number of borrowed resources).
-
-# todo: Write some basic unit tests or at least 1
