@@ -1,5 +1,5 @@
 import pytest
-from LibraryApp.src.library import Library, Book, Dvd, Cd, Magazine, Member, Memberships
+from LibraryApp.src.library import Library, Book, Dvd, Memberships
 
 
 class TestLibrary:
