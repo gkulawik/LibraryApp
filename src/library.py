@@ -116,6 +116,13 @@ class Library:
         self._members = []
 
     def add_resource(self, new_resource: LibraryResource, quantity_to_add: int):
+        """
+        Method to add resources to the library. If the resource already exists in the library, adding it again
+        will only increase its quantity in the library.
+        :param new_resource: A resource to be added.
+        :param quantity_to_add: Number of copies to be added.
+        :return:
+        """
         if not isinstance(new_resource, LibraryResource):
             raise TypeError("The resource must be of type derived from type LibraryResource, e.g., Book!")
         if not quantity_to_add > 0:
@@ -183,6 +190,12 @@ class Library:
             raise KeyError("Didn't find any resources matching your criteria!")
 
     def create_member(self, name, membership_status):
+        """
+        Method to add new library members.
+        :param name: Member's name
+        :param membership_status: Membership status, defines member's borrowing limit.
+        :return:
+        """
         if len(self._members) > 0:
             user_id = (max(member.id for member in self._members)) + 1
         else:
@@ -247,7 +260,6 @@ class Library:
         Member passes a list of resources' IDs they want to return and the library handles the rest.
         If the conditions to return any of the specified resources are met, library passes back to the member
         a list of IDs of the resources they returned.
-        :param member: Member object.
         :param resources_to_return_ids: List of ID's of the library resources to return.
         :return: List of resources' IDs that were returned.
         """
@@ -445,11 +457,28 @@ class Member:
 
     @property
     def borrowed_resources_details(self):
-        borrowed_resources_details = []
+        """
+        Use the find_resources() method to fetch all details for the IDs assigned to the member as their
+        borrowed resources; then filter out all unnecessary details (attributes) for each resource,
+        i.e., availability_status, quantity, id - these details should not be visible when looking up the resources
+        borrowed by members.
+        :return: A list of borrowed resources' details, without the unnecessary library data
+        """
+        borrowed_resources_full_details = []
+        borrowed_resources_trimmed_details = []
         for item_id in self.borrowed_resources_ids:
-            resource_details = self.library.find_resources(id=item_id)
-            borrowed_resources_details.append(resource_details)
-        return borrowed_resources_details
+            borrowed_item_full_details = self.library.find_resources(id=item_id)
+            borrowed_resources_full_details.append(borrowed_item_full_details)
+        # Attributes to ignore
+        ignore_attrs = ["availability_status", "quantity", "id"]
+        for items in borrowed_resources_full_details:
+            for detail in items:
+                # Using vars() to get all attributes as a dictionary
+                attrs = vars(detail)
+                # Filter out attributes you don't want
+                filtered_attrs = {key: value for key, value in attrs.items() if key not in ignore_attrs}
+                borrowed_resources_trimmed_details.append(filtered_attrs)
+        return borrowed_resources_trimmed_details
 
     def __str__(self):
         return f"{self._name}, {self._membership_status.name} member"
