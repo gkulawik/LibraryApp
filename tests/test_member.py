@@ -84,20 +84,14 @@ class TestMember:
         """
         self.member1.borrow_resources([1, 3])
         assert self.member1.borrowed_resources_ids == [1, 3]
-        assert self.member1.borrowed_resources_details == [[Book(title='The Lord of the Rings - Trilogy',
-                                                                 genre='fantasy fiction',
-                                                                 availability_status=True,
-                                                                 quantity=1,
-                                                                 id=1,
-                                                                 author='J.R.R. Tolkien',
-                                                                 isbn='978-0261103252')],
-                                                           [Dvd(title='Gladiator',
-                                                                genre='historical fiction',
-                                                                availability_status=True,
-                                                                quantity=1,
-                                                                id=3,
-                                                                director='Ridley Scott',
-                                                                duration='2h 18min')]]
+        assert self.member1.borrowed_resources_details == [{'title': 'The Lord of the Rings - Trilogy',
+                                                            'genre': 'fantasy fiction',
+                                                            'author': 'J.R.R. Tolkien',
+                                                            'isbn': '978-0261103252'},
+                                                           {'title': 'Gladiator',
+                                                            'genre': 'historical fiction',
+                                                            'director': 'Ridley Scott',
+                                                            'duration': '2h 18min'}]
         assert self.library1.resources == [Book(title='The Lord of the Rings - Trilogy',
                                                 genre='fantasy fiction',
                                                 availability_status=True,
